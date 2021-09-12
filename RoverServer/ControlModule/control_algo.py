@@ -17,6 +17,7 @@ class Control:
         self.port = 9996
         while True:
             try:  
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 print("Binding the Port: " + str(self.port))
                 self.s.bind((self.host, self.port))
                 self.s.listen(5)
@@ -40,7 +41,7 @@ class Control:
         self.send_commands('Stopping!')
         self.s.close()
         self.conn.close()
-        self.ser.close()
+        #self.ser.close()
 
     def read_commands(self):
         while True:
@@ -127,6 +128,7 @@ class Control:
         self.kill = self.strToInt(kill)
             
         data = json.dumps(self.getData())
+        print(data)
         #self.sendtoard(data)
 
 

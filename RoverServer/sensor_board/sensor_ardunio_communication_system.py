@@ -22,11 +22,30 @@ Dependencies:
 import serial 
 import time 
 import math
+import socket
+import argparse
 
 class Sensor_data :
-    def __init__(self, port, baudrate):
+    def __init__(self, port, baudrate, is_server_running):
         self.arduino = serial.Serial(port=port, baudrate=baudrate)
-    
+        # Initialising all the variables
+        self.pressure = 0
+        self.altitude = 0
+        self.temperature_bmp = 0
+        self.luminosity = 0
+        self.humidity = 0
+        self.temperature_dht = 0
+        self.methane = 0
+        self.ammonia = 0
+        self.moisture = 0
+        self.server = is_server_running
+        # Making socket connection
+        if self.server == True:
+            self.host = '192.168.29.139'
+            self.port = 9995
+            self.s = socket.socket()
+            self.s.connect((self.host, self.port))
+
     def read (self) :
         """ 
         reads the data from serial port and converts into Unicode
@@ -36,8 +55,44 @@ class Sensor_data :
         data= decoded.split()
         return data
      
+    def sendDataToBase():
+        if self.server == False:
+            return
+        stringData = '0,' + str(self.pressure) + ',' + str(self.altitude) + ',' + str(self.temperature_bmp) + ',' + str(self.luminosity) + ',' + str(self.humidity) + ',' + str(self.temperature_dht) + ',' + str(self.methane) + ',' + str(self.ammonia) + ',' + str(self.moisture)
+        # Sendng this data from socket to the Xavier
+        self.s.send(str.encode(stringData))
+        # After sending we check if it was recieved or not
+        checkDataTranfer = self.s.recv(1024)
+        print(checkDataTranfer)
 
-    def sensor_data (self , read_data , required_data  ) :
+    def printData(self):
+        print("pressure: " + self.pressure)
+        print("altitude: " + self.altitude)
+        print("temperature_bmp: " + self.temperature_bmp)
+        print("luminosity: " + self.luminosity)
+        print("humidity: " + self.humidity)
+        print("temperature_dht: " + self.temperature_dht)
+        print("methane: " + self.methane)
+        print("ammonia: " + self.ammonia)
+        print("moisture: " + self.moisture)
+
+    def run(self):
+        while True:
+            data = self.read()
+            self.pressure = sensor_data(data, 'pressure')
+            self.altitude = sensor_data(data, 'altitude')
+            self.temperature_bmp = sensor_data(data, 'temperature_bmp')
+            self.luminosity = sensor_data(data, 'luminosity')
+            self.humidity = sensor_data(data, 'humidity')
+            self.temperature_dht = sensor_data(data, 'temperature_dht')
+            self.methane = sensor_data(data, 'Methane')
+            self.ammonia = sensor_data(data, 'ammonia')
+            self.moisture = sensor_data(data, 'moisture')
+            self.sendDataToBase()
+            self.printData()
+            time.sleep(2)
+
+    def sensor_data (self , read_data , required_data) :
         """ 
         Returns required sensor data 
 
@@ -56,7 +111,7 @@ class Sensor_data :
         """
         if (required_data == "pressure") :
             # umit pascal 
-            pressure = float(read_data[0])
+            pressure = round(float(read_data[0], 2))
             return pressure 
         elif (required_data == "altitude") :
             # unit  meters 
@@ -67,27 +122,40 @@ class Sensor_data :
             # 3. T = 288.15
             # 4. R = 8.3143
             # 5. sea_pressure=101325 pascal
-            pressure = float(read_data[0])
+            pressure = round(float(read_data[0], 2))
             altitude = ((math.log((pressure /101325))/0.00012)*-1)
             return altitude 
         elif (required_data == "temperature_bmp") :
-            temperature = float(read_data[1])
+            temperature = round(float(read_data[1], 2))
             return temperature 
         elif (required_data == "luminosity") :  
-            luminosity = float(read_data[2])
+            luminosity = round(float(read_data[2], 2))
             return luminosity
         elif (required_data == "humidity") :
-            humidity = float(read_data[3])  
+            humidity = round(float(read_data[3], 2))
             return humidity 
         elif (required_data == "temperature_dht") :
-            humidity = float(read_data[4])  
+            temperature = round(float(read_data[4], 2))
             return temperature
         elif(required_data == "Methane" ) :
-            methane = float(read_data[5])
+            methane = round(float(read_data[5], 2))
             return methane 
         elif (required_data == "ammoina ") :
-            ammonia = float(read_data[6])
+            ammonia = round(float(read_data[6], 2))
             return ammonia
         elif (required_data == "moisture" ) :
-            soil_moisture = float(read_data[7])
+            soil_moisture = round(float(read_data[7], 2))
+            return soil_moisture
 
+if __name__ == "__main__":
+    '''
+    The program now takes one argument which is optional
+    The argument is server which states if the base station suide code is running
+    The default value is False and can be used for debugging when only data from the arduino has to be taken
+    '''
+    ap = argparse.ArgumentParser()
+    ap.add_argument("-i", "--server", type = bool, default = False, help = "Is the server running")
+    args = vars(ap.parse_args())
+    sensors = Sensor_data('COM3', 115200, args["server"])
+    sensors.run()
+    del sensors

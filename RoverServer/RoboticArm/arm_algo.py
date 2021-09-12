@@ -17,6 +17,7 @@ class Robotic_Arm:
         self.port = 9998
         while True:
             try:  
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 print("Binding the Port: " + str(self.port))
                 self.s.bind((self.host, self.port))
                 self.s.listen(5)
@@ -40,7 +41,7 @@ class Robotic_Arm:
         self.send_commands('Stopping!')
         self.s.close()
         self.conn.close()
-        self.ser.close()
+        #self.ser.close()
 
     def read_commands(self):
         while True:
