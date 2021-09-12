@@ -4,17 +4,17 @@ import json
 import time
 import threading
 
-class Robotic_Arm:
+class Control:
     def __init__(self):
-        self.baseMotorSpeed = 0
-        self.baseActuator = 0
-        self.armActuator = 0
-        self.clawPitch = 0
-        self.clawRoll= 0
-        self.clawOpenClose = 0
+        self.r = 0
+        self.g = 0
+        self.b = 0
+        self.fan1 = 0
+        self.fan2 = 0
+        self.kill = 0
         self.s = socket.socket()
         self.host = ""
-        self.port = 9998
+        self.port = 9996
         while True:
             try:  
                 print("Binding the Port: " + str(self.port))
@@ -53,7 +53,7 @@ class Robotic_Arm:
                 self.send_commands('YES')
                 index1 = dataFromBase.index(',')
                 modeStr = dataFromBase[0:index1]
-                self.roboticArm(dataFromBase, index1)
+                self.control(dataFromBase, index1)
             else:
                 self.send_commands('NO')
 
@@ -91,51 +91,42 @@ class Robotic_Arm:
 
     def getData(self):
         data = dict()
-        motors = list()
-        motors.append(str(self.baseMotorSpeed))
-        motors.append(str(self.baseActuator))
-        motors.append(str(self.armActuator))
-        motors.append(str(self.clawPitch))
-        motors.append(str(self.clawRoll))
-        motors.append(str(self.clawOpenClose))
-        motors.append("0")
-        motors.append("0")
-        motors.append("0")
-        data.update({"m" : motors})
-        data.update({"kill" : "0"})
-        data.update({"req" : "1"})
+        data.update({"red" : str(self.r)})
+        data.update({"green" : str(self.g)})
+        data.update({"blue" : str(self.b)})
+        data.update({"fan1" : str(self.fan1)})
+        data.update({"fan2": str(self.fan2)})
+        data.update({"relay": str(self.kill)})
+        data.update({"req": "1"})
         return data
 
-    def printRoboticArmVariables(self):
-        print(self.baseMotorSpeed, self.baseActuator, self.armActuator, self.clawPitch, self.clawRoll, self.clawOpenClose)
+    def control(self, dataFromBase, index1):
+            
+        index2 = dataFromBase.index(',',index1 + 1)
+            
+        r = dataFromBase[index1 + 1 : index2]
+        self.r = self.strToInt(r)
+        
+        index3 = dataFromBase.index(',', index2+1)
+        g = dataFromBase[index2 + 1 : index3]
+        self.g = self.strToInt(g)
 
-    def roboticArm(self,dataFromBase, index1):
-        
-        index2 = dataFromBase.index(',',index1+1)
-        StrbaseMotorSpeed = dataFromBase[index1+1:index2]
-        self.baseMotorSpeed = self.strToInt(StrbaseMotorSpeed);
-        
-        index3 = dataFromBase.index(',',index2+1)
-        StrbaseActuator = dataFromBase[index2+1:index3]
-        self.baseActuator = self.strToInt(StrbaseActuator);
+        index4 = dataFromBase.index(',', index3+1)
+        b = dataFromBase[index3+1 : index4]
+        self.b = self.strToInt(b)
 
-        index4 = dataFromBase.index(',',index3+1)
-        StrarmActuator = dataFromBase[index3+1:index4]
-        self.armActuator = self.strToInt(StrarmActuator);
-        
-        index5 = dataFromBase.index(',',index4+1)
-        StrclawPitch = dataFromBase[index4+1:index5]
-        self.clawPitch = self.strToInt(StrclawPitch);
-        
-        index6 = dataFromBase.index(',',index5+1)
-        StrclawRoll = dataFromBase[index5+1:index6]
-        self.clawRoll = self.strToInt(StrclawRoll);
-        
-        index7 = dataFromBase.index(',',index6+1)
-        StrclawOpenClose = dataFromBase[index6+1:index7]
-        self.clawOpenClose = self.strToInt(StrclawOpenClose);
-        
-        self.printRoboticArmVariables();
+        index5 = dataFromBase.index(',', index4+1)
+        fan1 = dataFromBase[index4+1 : index5]
+        self.fan1 = self.strToInt(fan1)
+
+        index6 = dataFromBase.index(',', index5+1)
+        fan2 = dataFromBase[index5+1 : index6]
+        self.fan2 = self.strToInt(fan2)
+
+        kill = dataFromBase[index6+1 :]
+        self.kill = self.strToInt(kill)
+            
         data = json.dumps(self.getData())
-        # self.sendtoard(data)
+        #self.sendtoard(data)
+
 

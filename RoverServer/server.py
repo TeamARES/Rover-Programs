@@ -4,9 +4,14 @@ import datetime
 import time
 from Propulsion import propulsion_algo
 from RoboticArm import arm_algo
+from ControlModule import control_algo
 import cv2
 import time
 app = Flask(__name__)
+
+camera_spectro = 0
+camera_micro = 0
+
 @app.route("/propulsion")
 def propulsion():
 	prop = propulsion_algo.Propulsion()
@@ -24,12 +29,14 @@ def science():
 	return "Started Science module!"
 
 @app.route("/control")
-def science():
+def control():
+	con = control_algo.Control()
+	del con
 	return "Started Control module!"
 
 @app.route("/capture_spectro")
 def capture_spectro():
-	camera = cv2.VideoCapture(0)
+	camera = cv2.VideoCapture(camera_spectro)
 	time.sleep(2)
 	ret, frame = camera.read()
 	cv2.imwrite("file.jpg", frame)
@@ -38,7 +45,7 @@ def capture_spectro():
 
 @app.route("/capture_micro")
 def capture_micro():
-	camera = cv2.VideoCapture(0)
+	camera = cv2.VideoCapture(camera_micro)
 	time.sleep(2)
 	ret, frame = camera.read()
 	cv2.imwrite("file.jpg", frame)

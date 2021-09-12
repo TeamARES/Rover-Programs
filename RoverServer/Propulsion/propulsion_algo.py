@@ -31,16 +31,21 @@ class Propulsion:
             )
         '''
         self.read_commands()
-        '''
+
+    def Stop(self):
+        self.send_commands('Stopping!')
+        self.s.close()
         self.conn.close()
         self.ser.close()
-        '''
 
     def read_commands(self):
         while True:
             dataFromBase = str(self.conn.recv(1024),"utf-8")
             print("\n Received Data = " + dataFromBase)
             if(len(dataFromBase) > 3):
+                if dataFromBase == "stop":
+                    self.Stop()
+                    break
                 self.send_commands('YES')
                 index1 = dataFromBase.index(',')
                 modeStr = dataFromBase[0:index1]
