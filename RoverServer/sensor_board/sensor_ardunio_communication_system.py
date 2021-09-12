@@ -59,7 +59,7 @@ class Sensor_data :
         if self.server == False:
             return
         stringData = '0,' + str(self.pressure) + ',' + str(self.altitude) + ',' + str(self.temperature_bmp) + ',' + str(self.luminosity) + ',' + str(self.humidity) + ',' + str(self.temperature_dht) + ',' + str(self.methane) + ',' + str(self.ammonia) + ',' + str(self.moisture)
-        # Sendng this data from socket to the Xavier
+        # Sendng this data from socket to the base station
         self.s.send(str.encode(stringData))
         # After sending we check if it was recieved or not
         checkDataTranfer = self.s.recv(1024)
