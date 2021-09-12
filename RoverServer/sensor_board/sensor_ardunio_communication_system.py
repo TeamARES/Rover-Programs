@@ -150,7 +150,7 @@ class Sensor_data :
 if __name__ == "__main__":
     '''
     The program now takes one argument which is optional
-    The argument is server which states if the base station suide code is running
+    The argument is server which states if the base station side code is running
     The default value is False and can be used for debugging when only data from the arduino has to be taken
     '''
     ap = argparse.ArgumentParser()
