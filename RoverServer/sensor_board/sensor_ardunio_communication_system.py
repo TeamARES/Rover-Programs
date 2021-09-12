@@ -124,7 +124,7 @@ class Sensor_data :
             # 5. sea_pressure=101325 pascal
             pressure = round(float(read_data[0], 2))
             altitude = ((math.log((pressure /101325))/0.00012)*-1)
-            return altitude 
+            return round(altitude, 2) 
         elif (required_data == "temperature_bmp") :
             temperature = round(float(read_data[1], 2))
             return temperature 
